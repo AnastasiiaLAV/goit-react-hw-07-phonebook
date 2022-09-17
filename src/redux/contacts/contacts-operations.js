@@ -1,5 +1,14 @@
 import * as api from "helper/api";
+import { Notify } from "notiflix";
 import actions from "./contacts-actions";
+
+
+const doubleСontacts = ({name, phone}, contacts) =>{
+    
+    const dublicate = contacts.find(item => item.name.toLowerCase() === name.toLowerCase() || item.phone === phone);
+
+    return Boolean(dublicate);
+} 
 
 export const fetchContacts = () =>{
     const func = async(dispatch) =>{
@@ -16,7 +25,15 @@ export const fetchContacts = () =>{
 }
 
 export const addContacts = (data) =>{
-    const func = async(dispatch) =>{
+    const func = async(dispatch, getState) =>{
+        
+        const {contacts} = getState();
+
+        if(doubleСontacts(data, contacts.items)){
+                Notify.warning(`${data.name.toUpperCase()} contact already exists`);
+                return;
+        }
+
         try{
             dispatch(actions.addContactsLoading());
             const result = await api.addContacts(data);
@@ -31,6 +48,7 @@ export const addContacts = (data) =>{
 
 export const removeContacts = (id) =>{
     const func = async(dispatch) =>{
+
         try{
             dispatch(actions.removeContactsLoading());
             await api.removeContacts(id);
@@ -42,3 +60,4 @@ export const removeContacts = (id) =>{
     }
     return func;
 }
+

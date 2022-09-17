@@ -5,7 +5,6 @@ import * as Yup from 'yup';
 import { nanoid } from 'nanoid';
 import { FormStyled, FieldStyled, Button } from './Form.styled';
 import { useDispatch, useSelector } from 'react-redux';
-// import { Notify } from 'notiflix';
 import { getContacts } from 'redux/selectors';
 import { fetchContacts, addContacts} from 'redux/contacts/contacts-operations';
 const id = nanoid(5);
@@ -16,7 +15,7 @@ name: Yup.string()
     .max(15, 'Too Long!')
     .required('Please enter a name')
     .matches(/^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$/, "Must be only letters"),
-number: Yup.string()
+phone: Yup.string()
     .min(5, 'Too Short!')
     .max(10, 'Too Long!')
     .required('Please enter a number')
@@ -33,16 +32,8 @@ const ContactForm  = () => {
     }, [dispatch]);
 
     const onAddContact = (payload, { resetForm }) => {
-        console.log('(payload)', contacts)
-        // const sameСontacts = contacts.items.find(item => item.name.toLowerCase() === payload.name.toLowerCase() || item.phone === payload.phone);
-
-        // if (sameСontacts) {
-        //     Notify.warning('This contact already exists');
-        //     return;
-        // }
-
         dispatch(addContacts(payload));
-console.log('addContacts(payload)', addContacts(payload))
+        
         resetForm();
 
         return contacts;
