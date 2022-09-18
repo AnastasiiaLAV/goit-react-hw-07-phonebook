@@ -1,63 +1,109 @@
 import * as api from "helper/api";
 import { Notify } from "notiflix";
-import actions from "./contacts-actions";
-
+// import actions from "./contacts-actions";
+import { createAsyncThunk } from "@reduxjs/toolkit";
 
 const doubleСontacts = ({name, phone}, contacts) =>{
-    
     const dublicate = contacts.find(item => item.name.toLowerCase() === name.toLowerCase() || item.phone === phone);
-
     return Boolean(dublicate);
 } 
 
-export const fetchContacts = () =>{
-    const func = async(dispatch) =>{
+export const fetchContacts = createAsyncThunk(
+    "contacts/fatch",
+    async(_, thunkAPI) => {
         try{
-            dispatch(actions.fetchContactsLoading());
             const data = await api.getContacts();
-            dispatch(actions.fetchContactsSuccsess(data));
-        }
-        catch(error){
-            dispatch(actions.fetchContactsError(error.massage));
+            console.log('data', data)
+            return data;
+        } catch(error){
+            return thunkAPI.rejectWithValue(error);
         }
     }
-    return func;
-}
+);
 
-export const addContacts = (data) =>{
-    const func = async(dispatch, getState) =>{
-        
-        const {contacts} = getState();
+// export const fetchContacts = () =>{
+//     const func = async(dispatch) =>{
+//         try{
+//             dispatch(actions.fetchContactsLoading());
+//             const data = await api.getContacts();
+//             dispatch(actions.fetchContactsSuccsess(data));
+//         }
+//         catch(error){
+//             dispatch(actions.fetchContactsError(error.massage));
+//         }
+//     }
+//     return func;
+// }
 
-        if(doubleСontacts(data, contacts.items)){
-                Notify.warning(`${data.name.toUpperCase()} contact already exists`);
-                return;
-        }
-
+export const addContacts = createAsyncThunk(
+    "contacts/add",
+    async(data, {rejectWithValue}) =>{
         try{
-            dispatch(actions.addContactsLoading());
             const result = await api.addContacts(data);
-            dispatch(actions.addContactsSuccsess(result));
+            return result;
         }
         catch(error){
-            dispatch(actions.addContactsError(error.massage));
+            return rejectWithValue(error);
+        }
+    },
+    {
+        condition: (data, {getState}) =>{
+            const {contacts} = getState();
+            if(doubleСontacts(data, contacts.items)){
+                Notify.warning(`${data.name.toUpperCase()} contact already exists`);
+                return false;
+            }
         }
     }
-    return func;
-}
+);
 
-export const removeContacts = (id) =>{
-    const func = async(dispatch) =>{
+// export const addContacts = (data) =>{
+//     const func = async(dispatch, getState) =>{
+        
+//         const {contacts} = getState();
 
+//         if(doubleСontacts(data, contacts.items)){
+//                 Notify.warning(`${data.name.toUpperCase()} contact already exists`);
+//                 return;
+//         }
+
+//         try{
+//             dispatch(actions.addContactsLoading());
+//             const result = await api.addContacts(data);
+//             dispatch(actions.addContactsSuccsess(result));
+//         }
+//         catch(error){
+//             dispatch(actions.addContactsError(error.massage));
+//         }
+//     }
+//     return func;
+// }
+
+export const removeContacts = createAsyncThunk(
+    "contacts/remove",
+    async(id, {rejectWithValue}) =>{
         try{
-            dispatch(actions.removeContactsLoading());
             await api.removeContacts(id);
-            dispatch(actions.removeContactsSuccsess(id));
+            return id;
         }
         catch(error){
-            dispatch(actions.removeContactsError(error.massage));
+            return rejectWithValue(error);
         }
     }
-    return func;
-}
+);
+
+// export const removeContacts = (id) =>{
+//     const func = async(dispatch) =>{
+
+//         try{
+//             dispatch(actions.removeContactsLoading());
+//             await api.removeContacts(id);
+//             dispatch(actions.removeContactsSuccsess(id));
+//         }
+//         catch(error){
+//             dispatch(actions.removeContactsError(error.massage));
+//         }
+//     }
+//     return func;
+// }
 
